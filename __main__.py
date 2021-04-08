@@ -1,13 +1,19 @@
+import os
 import pygame
 import random
 import time
 
-####
+questions_per_round = 2
+scriptdir = os.path.abspath(os.path.dirname(__file__))
+font = (os.path.join(scriptdir, 'fonts', 'DK Crayon Crumble.ttf'), 72)
+background = os.path.join(scriptdir, 'images', 'bg1.jpg')
+sound_fail = os.path.join(scriptdir, 'sounds', 'fail.mp3')
+sound_success = os.path.join(scriptdir, 'sounds', 'level1000.mp3')
 
 class Question:
 
     def __init__(self):
-        self.font = pygame.font.Font('fonts/DK Crayon Crumble.ttf', 72)
+        self.font = pygame.font.Font(*font)
         self.a = random.randint(0,9)
         self.b = random.randint(5,9)
         self.type = '*'
@@ -53,14 +59,14 @@ class App(object):
         self.width = width
         self.height = height
         self.screen = pygame.display.set_mode((self.width, self.height), pygame.DOUBLEBUF)
-        self.background = pygame.image.load("images/bg1.jpg")
+        self.background = pygame.image.load(background)
         self.background = pygame.transform.scale(self.background, self.screen.get_size())
         self.clock = pygame.time.Clock()
         self.fps = fps
         self.playtime = 0.0
         self.questions = []
-        self.font = pygame.font.Font('fonts/DK Crayon Crumble.ttf', 72)
-        self.max_questions = 2
+        self.font = pygame.font.Font(*font)
+        self.max_questions = questions_per_round
         
 
     def start(self):
@@ -105,7 +111,7 @@ class App(object):
                             q.status = False
                             self.draw_text("Forkert")
                             pygame.mixer.init()
-                            pygame.mixer.music.load("sounds/fail.mp3")
+                            pygame.mixer.music.load(sound_fail)
                             pygame.mixer.music.play()
                         q.text = "{}{}".format(q.text, q.answer)
                         self.questions.append(q)
@@ -135,14 +141,14 @@ class App(object):
             if len(self.questions) >= self.max_questions:
                 fails = [q for q in self.questions if q.status == False]
                 slow = [q for q in self.questions if q.time > 4.0]
-                farstest = min([q.time for q in self.questions])
+                fastest = min([q.time for q in self.questions])
                 slowest = max([q.time for q in self.questions])
                 average = sum([q.time for q in self.questions])/self.max_questions
                 correct = len([q for q in self.questions if q.status == True])
                 wrong = len([q for q in self.questions if q.status == False])
                 if len(fails) == 0 and len(slow) == 0:
                     pygame.mixer.init()
-                    pygame.mixer.music.load("sounds/level1000.mp3")
+                    pygame.mixer.music.load(sound_success)
                     pygame.mixer.music.play()
                     self.draw_text("Tillykke du er level 1000!")
                     pygame.display.flip()
@@ -153,10 +159,17 @@ class App(object):
                     print("{} ({:0.1f})".format(q.text, q.time))
                 print("Rigtige svar:          {}".format(correct))
                 print("Forkerte svar:         {}".format(wrong))
-                print("Hurtigste svar tid:    {:0.1f} sekunder".format(farstest))
+                print("Hurtigste svar tid:    {:0.1f} sekunder".format(fastest))
                 print("Langsommeste svar tid: {:0.1f} sekunder".format(slowest))
                 print("Middel svar tid:       {:0.1f} sekunder".format(average))
-                self.draw_text("Vil du prøve igen tryk 'y'")
+                self.draw_text(f"""
+Rigtige svar:            {correct}
+Forkerte svar:           {wrong}
+Hurtigste svar tid:      {fastest:0.1f} sekunder
+Langsommeste svar tid: {slowest:0.1f} sekunder
+Middel svar tid:         {average:0.1f} sekunder
+
+Vil du prøve igen tryk 'y'""")
                 pygame.display.flip()
                 key_pressed = False
                 while not key_pressed:
@@ -176,10 +189,20 @@ class App(object):
     def draw_text(self, text):
         """Center text in window
         """
-        fw, fh = self.font.size(text) # fw: font width,  fh: font height
-        surface = self.font.render(text, True, (255, 255, 255))
-        # // makes integer division in python3
-        self.screen.blit(surface, ((self.width - fw) // 2, (self.height - fh) // 2))
+        lines = text.split('\n')
+        
+        
+        for i, line in enumerate(lines):
+            fw, fh = self.font.size(line) # fw: font width,  fh: font height
+            height = (self.height - fh) // 2
+            width = (self.width - fw) // 2
+            if i:
+                fh = 72
+                height = 0
+                width = 20
+            # // makes integer division in python3
+            surface = self.font.render(line, True, (255, 255, 255))
+            self.screen.blit(surface, (width, height + fh*i*1.2))
 
 ####
 
