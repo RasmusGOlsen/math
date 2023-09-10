@@ -1,3 +1,3 @@
 # math
 
-Math app for training multiplication.
+This is a game for training math tables.
