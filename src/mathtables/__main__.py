@@ -1,4 +1,3 @@
-import os
 import pygame
 import random
 import time
@@ -87,7 +86,8 @@ class App(object):
         time.sleep(1)
         self.screen.blit(self.background, (0, 0))
 
-    def run(self):
+    # TODO: refactor function. It is too complex.
+    def run(self):  # noqa: C901
         """The mainloop
         """
         running = True
@@ -132,9 +132,6 @@ class App(object):
 
             milliseconds = self.clock.tick(self.fps)
             self.playtime += milliseconds / 1000.0
-#            self.draw_text("FPS: {:6.3}{}PLAYTIME: {:6.3} SECONDS".format(
-#                           self.clock.get_fps(), " "*5, self.playtime))
-
             q.draw_question(self.screen)
             pygame.display.flip()
             self.screen.blit(self.background, (0, 0))
@@ -155,13 +152,6 @@ class App(object):
                     while pygame.mixer.music.get_busy():
                         time.sleep(1)
                     self.screen.blit(self.background, (0, 0))
-                # for q in self.questions:
-                #     print("{} ({:0.1f})".format(q.text, q.time))
-                # print("Rigtige svar:          {}".format(correct))
-                # print("Forkerte svar:         {}".format(wrong))
-                # print("Hurtigste svar tid:    {:0.1f} sekunder".format(fastest))
-                # print("Langsommeste svar tid: {:0.1f} sekunder".format(slowest))
-                # print("Middel svar tid:       {:0.1f} sekunder".format(average))
                 self.draw_text(f"""
 Rigtige svar:            {correct}
 Forkerte svar:           {wrong}
